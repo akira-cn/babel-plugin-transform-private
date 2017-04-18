@@ -1,0 +1,39 @@
+{
+  "name": "babel-plugin-transform-private",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/transform-private.js",
+  "dependencies": {},
+  "devDependencies": {
+    "ava": "^0.19.1",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.4.0"
+  },
+  "scripts": {
+    "compile": "babel tests/cases/expression.js",
+    "test": "ava"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "ava": {
+    "files": [
+      "tests/test.js"
+    ],
+    "source": [
+      "**/*.{js,jsx}",
+      "!dist/**/*"
+    ],
+    "concurrency": 5,
+    "failFast": true,
+    "failWithoutAssertions": false,
+    "tap": true,
+    "powerAssert": false,
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
+  }
+}
