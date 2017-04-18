@@ -1,6 +1,6 @@
 # Babel Private Field Plugin
 
-This is a plugin provide private fields in a ES6+ class. It's not like [ECMAScript Private Fields](https://github.com/tc39/proposal-private-fields) proposal but auto transform any field start with '_' into private in a class.
+This is a plugin provide private fields in ES6+ class. It's not like [ECMAScript Private Fields](https://github.com/tc39/proposal-private-fields) proposal but auto transform any field start with '_' into private in a class.
 
 ## Usage
 
