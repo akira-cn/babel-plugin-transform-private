@@ -1,4 +1,5 @@
 {
+  "presets": ["env"],
   "plugins": [
     ["../src/transform-private.js", {
       "pattern": "^_"

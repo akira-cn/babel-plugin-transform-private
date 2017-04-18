@@ -36,7 +36,7 @@ test('nested', t => {
 test('expression', t => {
   var foo = new Foo(1, 2),
       bar = new Bar(1, 2);
-
+      
   t.is(foo._x, undefined);
   t.is(foo._zz, undefined);
   t.is(foo._z, undefined);

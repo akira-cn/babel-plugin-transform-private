@@ -45,17 +45,17 @@ output:
 
 ```js
 const Point2D = function () {
-  const [_x, _y] = [Symbol("_x"), Symbol("_y")];
+  const [$_x$, $_y$] = [Symbol("$_x$"), Symbol("$_y$")];
   class Point2D {
     constructor(x, y) {
-      this[_x] = x;
-      this[_y] = y;
+      this[$_x$] = x;
+      this[$_y$] = y;
     }
     get XY() {
-      return [this[_x], this[_y]];
+      return [this[$_x$], this[$_y$]];
     }
     get length() {
-      return Math.sqrt(this[_x] * this[_x] + this[_y] * this[_y]);
+      return Math.sqrt(this[$_x$] * this[$_x$] + this[$_y$] * this[$_y$]);
     }
   }
   return Point2D;
@@ -90,23 +90,23 @@ output:
 
 ```js
 const Outer = function () {
-  const [_inner] = [Symbol("_inner")];
+  const [$_inner$] = [Symbol("$_inner$")];
   class Outer {
     constructor() {
-      this[_inner] = function () {
-        const [_x] = [Symbol("_x")];
+      this[$_inner$] = function () {
+        const [$_x$] = [Symbol("$_x$")];
         return class Inner {
           constructor(x) {
-            this[_x] = x;
+            this[$_x$] = x;
           }
           get X() {
-            return this[_x];
+            return this[$_x$];
           }
         };
       }();
     }
     get innerCls() {
-      return this[_inner];
+      return this[$_inner$];
     }
   }
   return Outer;
@@ -149,15 +149,15 @@ output:
 
 ```js
 export const Foo = function () {
-  const [_x, _y, _zz, _z] = [Symbol("_x"), Symbol("_y"), Symbol("_zz"), Symbol("_z")];
+  const [$_x$, $_y$, $_zz$, $_z$] = [Symbol("$_x$"), Symbol("$_y$"), Symbol("$_zz$"), Symbol("$_z$")];
   return class {
     constructor(x, y) {
-      this[_x] = x;
-      this[_y] = y;
-      this[_zz] = x + y;
+      this[$_x$] = x;
+      this[$_y$] = y;
+      this[$_zz$] = x + y;
     }
-    get [_z]() {
-      return this[_zz];
+    get [$_z$]() {
+      return this[$_zz$];
     }
   };
 }();
@@ -167,10 +167,10 @@ export const Bar = class extends Foo {
     super(x * 2, y * 3);
   }
   get z() {
-    return super[Object.getOwnPropertySymbols(this.__proto__.__proto__).filter(s => String(s) === "Symbol(_z)")[0]];
+    return super[Object.getOwnPropertySymbols(this.__proto__.__proto__).filter(s => String(s) === "Symbol($_z$)")[0]];
   }
   get z2() {
-    return super[Object.getOwnPropertySymbols(this.__proto__.__proto__).filter(s => String(s) === "Symbol(_zz)")[0]];
+    return super[Object.getOwnPropertySymbols(this.__proto__.__proto__).filter(s => String(s) === "Symbol($_zz$)")[0]];
   }
 };
 ```

@@ -78,13 +78,14 @@ module.exports = function ({types: t}) {
           meta = stack[stack.length - 1];
 
       let regExp = new RegExp(state.opts.pattern || '^_');
+      let symbolName = '$' + node.name + '$';
 
       if(parentNode 
          && parentNode.type === 'MemberExpression' 
          && parentNode.object.type === 'ThisExpression'
          && !parentNode.computed
          && regExp.test(node.name)){ //private
-
+        node.name = symbolName;
         meta.variables.add(node.name);
         parentNode.computed = true;
       }else if(parentNode 
@@ -92,7 +93,7 @@ module.exports = function ({types: t}) {
          && parentNode.object.type === 'Super'
          && !parentNode.computed
          && regExp.test(node.name)){
-
+        node.name = symbolName;
         parentNode.computed = true;
         let expr = getPropertyFromSymbol(node.name);
         path.replaceWith(expr);
@@ -100,7 +101,7 @@ module.exports = function ({types: t}) {
       }else if(parentNode 
          && parentNode.type === 'ClassMethod' 
          && regExp.test(node.name)){
-
+        node.name = symbolName;
         meta.variables.add(node.name);
         parentNode.computed = true;
       }

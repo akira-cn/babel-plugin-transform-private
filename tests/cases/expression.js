@@ -9,6 +9,7 @@ export const Foo = class {
   }
 }
 
+
 export const Bar = class extends Foo{
   constructor(x, y){
     super(x * 2, y * 3);
