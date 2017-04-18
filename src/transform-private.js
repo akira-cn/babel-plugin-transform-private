@@ -1,7 +1,7 @@
 module.exports = function ({types: t}) {
   const stack = [];
 
-  function getPropertyFromSymbol(name){
+  function transformPropertyToSymbol(name){
     let expr = t.callExpression(
       t.memberExpression(
         t.identifier('Object'),
@@ -46,26 +46,64 @@ module.exports = function ({types: t}) {
     return expr;
   }
 
-  function createSymbols(){
-      let meta = stack.pop(),
-          variableNames = Array.from(meta.variables);
-      
-      //no private variables
-      if(variableNames.length <= 0) return;
+  function transformCreateSymbols(){
+    let meta = stack.pop(),
+        variableNames = Array.from(meta.variables);
+    
+    //no private variables
+    if(variableNames.length <= 0) return;
 
-      let identifiers = variableNames.map(id => t.identifier(id));
+    let identifiers = variableNames.map(id => t.identifier(id));
 
-      let pattern = t.arrayPattern(identifiers);
+    let pattern = t.arrayPattern(identifiers);
 
-      let symbols = variableNames.map(id =>  
-        t.callExpression(t.identifier('Symbol'), [t.stringLiteral(id)]));
-      
-      symbols = t.arrayExpression(symbols);
+    let symbols = variableNames.map(id =>  
+      t.callExpression(t.identifier('Symbol'), [t.stringLiteral(id)]));
+    
+    symbols = t.arrayExpression(symbols);
+
+    return t.variableDeclaration(
+      'const',
+      [t.variableDeclarator(pattern, symbols)]
+    );  
+  }
+
+  function transformWrapClass(cls){
+    let symbols = transformCreateSymbols();
+    if(!symbols) return;
+
+    if(cls.type === 'ClassDeclaration'){
+      let expr = t.callExpression(
+        t.functionExpression(null, [], 
+          t.blockStatement(
+            [symbols,
+             cls,
+             t.returnStatement(
+               t.identifier(cls.id.name)
+             )]
+          )
+        ), []
+      );
 
       return t.variableDeclaration(
         'const',
-        [t.variableDeclarator(pattern, symbols)]
-      );  
+        [t.variableDeclarator(
+          t.identifier(cls.id.name),
+          expr
+        )]
+      );
+    }else if(cls.type === 'ClassExpression'){
+      return t.callExpression(
+        t.functionExpression(null, [], 
+          t.blockStatement(
+            [symbols,
+             t.returnStatement(
+               cls
+             )]
+          )
+        ), []
+      );
+    }
   }
 
   const classVisitor = {
@@ -95,7 +133,7 @@ module.exports = function ({types: t}) {
          && regExp.test(node.name)){
         node.name = symbolName;
         parentNode.computed = true;
-        let expr = getPropertyFromSymbol(node.name);
+        let expr = transformPropertyToSymbol(node.name);
         path.replaceWith(expr);
         path.skip();
       }else if(parentNode 
@@ -108,28 +146,8 @@ module.exports = function ({types: t}) {
     },
     ClassDeclaration: {
       exit(path){
-        let expr = createSymbols();
+        let expr = transformWrapClass(path.node);
         if(!expr) return;
-
-        expr = t.callExpression(
-          t.functionExpression(null, [], 
-            t.blockStatement(
-              [expr,
-               path.node,
-               t.returnStatement(
-                 t.identifier(path.node.id.name)
-               )]
-            )
-          ), []
-        );
-
-        expr = t.variableDeclaration(
-          'const',
-          [t.variableDeclarator(
-            t.identifier(path.node.id.name),
-            expr
-          )]
-        );
 
         if(path.parentPath.node.type === 'ExportDefaultDeclaration'){
           path.parentPath.insertAfter(t.exportDefaultDeclaration(
@@ -141,15 +159,6 @@ module.exports = function ({types: t}) {
         }
         
         path.skip();
-
-        //export class Foo; export default class Foo; ect.
-        // if(/^export/i.test(path.parentPath.node.type)){
-        //   path.parentPath.insertBefore(expr);
-        // }else{
-        //   path.insertBefore(expr);
-        // }
-        
-        // path.skip();
       },
       enter(path, state){
         stack.push({
@@ -159,19 +168,8 @@ module.exports = function ({types: t}) {
     },
     ClassExpression: {
       exit(path){
-        let expr = createSymbols();
+        let expr = transformWrapClass(path.node);
         if(!expr) return;
-
-        expr = t.callExpression(
-          t.functionExpression(null, [], 
-            t.blockStatement(
-              [expr,
-               t.returnStatement(
-                 path.node
-               )]
-            )
-          ), []
-        );
 
         path.replaceWith(expr);
         
