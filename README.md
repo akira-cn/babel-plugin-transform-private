@@ -13,7 +13,7 @@ Config `.babelrc` or `package.json`
 ```json
 {
   "plugins": [
-    ["../src/transform-private.js", {
+    ["transform-private", {
       "pattern": "^_"
     }],
   ]
