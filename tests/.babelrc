@@ -1,6 +1,7 @@
 {
   "presets": ["env"],
   "plugins": [
+    "transform-class-properties",
     ["../src/transform-private.js", {
       "pattern": "^_"
     }]

@@ -4,6 +4,7 @@ import Point2D from './cases/point2d.js';
 import Outer from './cases/nested.js';
 import {A, B} from './cases/protected.js';
 import {Foo, Bar} from './cases/expression.js';
+import Example from './cases/class-properties.js';
 
 test('private _x, _y', t => {
   var p = new Point2D(3, 4);
@@ -42,4 +43,19 @@ test('expression', t => {
   t.is(foo._z, undefined);
   t.is(bar.z, 8);
   t.is(bar.z2, undefined);
+});
+
+test('class properties', t => {
+  var bar = new Example();
+
+  t.is(bar._x, undefined);
+  t.is(bar._y, undefined);
+
+  t.deepEqual(bar.XY, {x: 0, y: 0});
+
+  bar.right();
+  t.deepEqual(bar.XY, {x: 1, y: 0});
+
+  bar.down(), bar.down();
+  t.deepEqual(bar.XY, {x: 1, y: 2});
 });

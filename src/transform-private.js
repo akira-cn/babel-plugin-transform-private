@@ -135,7 +135,6 @@ module.exports = function ({types: t}) {
         parentNode.computed = true;
         let expr = transformPropertyToSymbol(node.name);
         path.replaceWith(expr);
-        path.skip();
       }else if(parentNode 
          && parentNode.type === 'ClassMethod' 
          && regExp.test(node.name)){
@@ -143,51 +142,29 @@ module.exports = function ({types: t}) {
         meta.variables.add(node.name);
         parentNode.computed = true;
       }
+      path.skip();
     },
-    ClassDeclaration: {
-      exit(path){
-        let expr = transformWrapClass(path.node);
-        if(!expr) return;
+    Class(path, state) {
+      stack.push({
+        variables: new Set()
+      });
+      
+      path.traverse(classVisitor, state);
 
-        if(path.parentPath.node.type === 'ExportDefaultDeclaration'){
-          path.parentPath.insertAfter(t.exportDefaultDeclaration(
-            t.identifier(path.node.id.name)
-          ));
-          path.parentPath.replaceWith(expr);
-        }else{
-          path.replaceWith(expr);
-        }
-        
-        path.skip();
-      },
-      enter(path, state){
-        stack.push({
-          variables: new Set()
-        });
-      }
-    },
-    ClassExpression: {
-      exit(path){
-        let expr = transformWrapClass(path.node);
-        if(!expr) return;
+      let expr = transformWrapClass(path.node);
+      if(!expr) return;
 
+      if(path.isClassDeclaration() && 
+         path.parentPath.isExportDefaultDeclaration()){
+        path.parentPath.insertAfter(t.exportDefaultDeclaration(
+          t.identifier(path.node.id.name)
+        ));
+        path.parentPath.replaceWith(expr);
+      }else{
         path.replaceWith(expr);
-        
-        path.skip();
-      },      
-      enter(path, state){
-        stack.push({
-          variables: new Set()
-        });
-      }    
+      }
     }
   }
 
-  return {
-    visitor: {
-      Program(path, state) {
-        path.traverse(classVisitor, state);
-      }
-    }
-  };
+  return {visitor: classVisitor};
 }
